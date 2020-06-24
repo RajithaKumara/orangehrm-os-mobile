@@ -18,12 +18,11 @@
  *
  */
 
-import {AppRegistry, YellowBox} from 'react-native';
-import App from './src/App';
-import {name as appName} from './app.json';
+declare module 'native-base' {
+  export function getTheme(variables: any): any;
+}
 
-console.disableYellowBox = true;
-console.warn = () => {};
-YellowBox.ignoreWarnings(['Warning:']);
-
-AppRegistry.registerComponent(appName, () => App);
+declare module 'native-base/src/theme/variables/platform' {
+	const variables:any;
+	export default variables;
+}

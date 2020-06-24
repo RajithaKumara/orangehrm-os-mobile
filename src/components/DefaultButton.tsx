@@ -19,8 +19,18 @@
  */
 
 import React from 'react';
-import {Button, Text, NativeBase} from 'native-base';
+import {
+  Button,
+  Text,
+  StyleProvider,
+  NativeBase /* getTheme */,
+} from 'native-base';
+// import variables from 'native-base/src/theme/variables/material';
+import variables from 'native-base/src/theme/variables/platform';
 import withTheme, {WithTheme} from 'lib/hoc/withTheme';
+
+import getTheme from '../../native-base-theme/components';
+import material from '../../native-base-theme/variables/material';
 
 function DefaultButton(props: DefaultButtonProps) {
   const {
@@ -42,16 +52,26 @@ function DefaultButton(props: DefaultButtonProps) {
     color = theme.palette.secondary;
   }
 
+  const {...allVariables} = variables;
+  console.log(allVariables.brandPrimary);
+  // allVariables.brandPrimary = theme.
+  console.log(allVariables.brandPrimary);
+  console.log(getTheme(allVariables)['NativeBase.Button']);
+
+  // console.log(theme.palette.primary)
+  // console.log(getTheme({brandPrimary:theme.palette.primary})['NativeBase.Button'])
+
   return (
+    // <StyleProvider style={getTheme(allVariables)}>
     <Button
       style={[
-        style,
         {
           backgroundColor: color,
           borderRadius: theme.borderRadius,
         },
+        style,
       ]}
-      transparent
+      transparent={transparent}
       {...restProps}>
       <Text
         {...textProps}
@@ -59,6 +79,7 @@ function DefaultButton(props: DefaultButtonProps) {
         {title}
       </Text>
     </Button>
+    // </StyleProvider>
   );
 }
 

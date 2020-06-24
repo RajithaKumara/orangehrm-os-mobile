@@ -26,6 +26,7 @@ import {connect, ConnectedProps} from 'react-redux';
 import {fetchMyLeave} from 'store/leave/leave-usage/actions';
 import LeaveBalanceRow from 'screens/leave/components/LeaveBalanceRow';
 import LeaveUsageCard from 'screens/leave/components/LeaveUsageCard';
+import LeaveUsageActions from 'screens/leave/components/LeaveUsageActions';
 
 class MyLeaveUsage extends React.Component<MyLeaveUsageProps> {
   constructor(props: MyLeaveUsageProps) {
@@ -38,6 +39,7 @@ class MyLeaveUsage extends React.Component<MyLeaveUsageProps> {
       <MainLayout>
         <LeaveBalanceRow />
         <LeaveUsageCard />
+        <LeaveUsageActions />
       </MainLayout>
     );
   }

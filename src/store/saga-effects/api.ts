@@ -85,3 +85,32 @@ export function* apiGetCall(endpoint: string) {
   }
   throw new Error("Couldn't call with empty instanceUrl or accessToken.");
 }
+
+export function* apiPostCall(endpoint: string, body: object) {
+  const authParams: AuthParams = yield selectAuthParams();
+
+  if (authParams.accessToken !== null && authParams.instanceUrl !== null) {
+    const headers = new Headers();
+    headers.append('Authorization', `Bearer ${authParams.accessToken}`);
+    headers.append('Content-Type', 'multipart/form-data');
+    headers.append('Accept', 'application/json');
+
+    const bodyKeys = Object.keys(body);
+    const formdata = new FormData();
+    bodyKeys.forEach((key) => {
+      formdata.append(key, body[key as keyof typeof body]);
+    });
+
+    const requestOptions = {
+      method: 'POST',
+      headers: headers,
+      body: bodyKeys.length === 0 ? undefined : formdata,
+    };
+    const url = authParams.instanceUrl + endpoint;
+
+    const response = yield call(fetch, url, requestOptions);
+    const data = yield call([response, response.json]);
+    return data;
+  }
+  throw new Error("Couldn't call with empty instanceUrl or accessToken.");
+}

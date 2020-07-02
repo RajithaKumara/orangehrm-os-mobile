@@ -29,19 +29,36 @@ import {
   selectEntitlement,
   selectSelectedLeaveTypeId,
 } from 'store/leave/leave-usage/selectors';
+import {selectFromDate, selectToDate} from 'store/leave/apply-leave/selectors';
 import {selectLeaveType} from 'store/leave/leave-usage/actions';
+import {saveSingleDayLeaveRequest} from 'store/leave/apply-leave/actions';
 import Button from 'components/DefaultButton';
 import PickLeaveRequestType from 'screens/leave/components/PickLeaveRequestType';
 import PickLeaveRequestDays from 'screens/leave/components/PickLeaveRequestDays';
 import {APPLY_LEAVE} from 'screens';
+import {MultipleDayLeaveRequest} from 'store/leave/apply-leave/types';
 
 class ApplyLeave extends React.Component<ApplyLeaveProps> {
+  onPressApplyLeave = () => {
+    this.props.saveSingleDayLeaveRequest();
+    let test: MultipleDayLeaveRequest = {
+      type: '',
+      fromDate: '',
+      toDate: '',
+      partialOption: 'start',
+      startDayType: 'half_day',
+      startDayAMPM: 'AM',
+    };
+  };
+
   render() {
     const {
       theme,
       entitlements,
       selectedLeaveTypeId,
       selectLeaveTypeAction,
+      fromDate,
+      toDate,
     } = this.props;
     return (
       <MainLayout
@@ -52,7 +69,12 @@ class ApplyLeave extends React.Component<ApplyLeaveProps> {
               paddingVertical: theme.spacing * 2,
               backgroundColor: theme.palette.background,
             }}>
-            <Button title={'Apply'} primary fullWidth />
+            <Button
+              title={'Apply'}
+              primary
+              fullWidth
+              onPress={this.onPressApplyLeave}
+            />
           </View>
         }>
         <View
@@ -68,7 +90,11 @@ class ApplyLeave extends React.Component<ApplyLeaveProps> {
             selectedLeaveTypeId={selectedLeaveTypeId}
             selectLeaveTypeAction={selectLeaveTypeAction}
           />
-          <PickLeaveRequestDays currentRoute={APPLY_LEAVE} />
+          <PickLeaveRequestDays
+            currentRoute={APPLY_LEAVE}
+            fromDate={fromDate}
+            toDate={toDate}
+          />
         </View>
       </MainLayout>
     );
@@ -88,10 +114,13 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state: RootState) => ({
   entitlements: selectEntitlement(state),
   selectedLeaveTypeId: selectSelectedLeaveTypeId(state),
+  fromDate: selectFromDate(state),
+  toDate: selectToDate(state),
 });
 
 const mapDispatchToProps = {
   selectLeaveTypeAction: selectLeaveType,
+  saveSingleDayLeaveRequest: saveSingleDayLeaveRequest,
 };
 
 const connector = connect(mapStateToProps, mapDispatchToProps);

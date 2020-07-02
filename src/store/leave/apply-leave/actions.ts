@@ -22,9 +22,11 @@ import {
   PICK_FROM_DATE,
   PICK_TO_DATE,
   PICK_LEAVE_DATES,
+  SAVE_SINGLE_DAY_LEAVE_REQUEST,
   PickFromDateAction,
   PickToDateAction,
   PickDatesAction,
+  SaveSingleDayLeaveRequestAction
 } from 'store/leave/apply-leave/types';
 
 export const pickLeaveFromDate = (date?: string): PickFromDateAction => ({
@@ -40,4 +42,8 @@ export const pickLeaveToDate = (date?: string): PickToDateAction => ({
 export const pickLeaveDates = (state: boolean = true): PickDatesAction => ({
   type: PICK_LEAVE_DATES,
   state,
+});
+
+export const saveSingleDayLeaveRequest = (): SaveSingleDayLeaveRequestAction => ({
+  type: SAVE_SINGLE_DAY_LEAVE_REQUEST,
 });

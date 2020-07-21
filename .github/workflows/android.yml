@@ -1,6 +1,12 @@
 name: Android CI
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+    paths-ignore:
+      - 'src/**'
+      - 'ios/**'
+      - '__tests__/**'
 
 jobs:
   build:
@@ -19,5 +25,9 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: apks
-          path: android/app/build/outputs/apk/release/
+          path: |
+            android/app/build/outputs/apk/release/app-arm64-v8a-release.apk
+            android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk
+            android/app/build/outputs/apk/release/app-x86_64-release.apk
+            android/app/build/outputs/apk/release/app-x86-release.apk
+            android/app/build/outputs/apk/release/app-universal-release.apk

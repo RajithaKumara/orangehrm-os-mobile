@@ -37,6 +37,10 @@ import {
 } from 'store/leave/leave-usage/actions';
 import {resetApplyLeave} from 'store/leave/apply-leave/actions';
 import {TYPE_ERROR} from 'store/globals/types';
+import {
+  getMessageAlongWithGenericErrors,
+  getMessageAlongWithResponseErrors,
+} from 'services/api';
 
 function* saveLeaveRequest(
   action: ApplySingleDayLeaveRequestAction | ApplyMultipleDayLeaveRequestAction,
@@ -55,10 +59,16 @@ function* saveLeaveRequest(
       yield put(resetApplyLeave());
       yield showSnackMessage('Successfully Submited');
     } else {
-      yield showSnackMessage('Failed to Save Leave', TYPE_ERROR);
+      yield showSnackMessage(
+        getMessageAlongWithResponseErrors(response, 'Failed to Save Leave'),
+        TYPE_ERROR,
+      );
     }
   } catch (error) {
-    yield showSnackMessage('Failed to Save Leave', TYPE_ERROR);
+    yield showSnackMessage(
+      getMessageAlongWithGenericErrors(error, 'Failed to Save Leave'),
+      TYPE_ERROR,
+    );
   } finally {
     yield closeLoader();
   }

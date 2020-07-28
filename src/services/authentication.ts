@@ -18,8 +18,9 @@
  *
  */
 
-export const PUBLIC_MOBILE_CLIENT_ID = 'mobile';
-export const PUBLIC_MOBILE_CLIENT_SECRET = 'mobile';
+export const PUBLIC_MOBILE_CLIENT_ID = 'orangehrm_mobile_app';
+export const PUBLIC_MOBILE_CLIENT_SECRET = '';
+export const REQUIRED_SCOPE = 'user';
 export const GRANT_TYPE_PASSWORD = 'password';
 export const GRANT_TYPE_REFRESH_TOKEN = 'refresh_token';
 
@@ -32,6 +33,7 @@ export const authenticate = (
     grant_type: GRANT_TYPE_PASSWORD,
     client_id: PUBLIC_MOBILE_CLIENT_ID,
     client_secret: PUBLIC_MOBILE_CLIENT_SECRET,
+    scope: REQUIRED_SCOPE,
     username,
     password,
   });

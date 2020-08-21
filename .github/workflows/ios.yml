@@ -27,6 +27,7 @@ jobs:
           cd ios && pod install
       - name: Build app
         run: |
+          cd ios
           xcodebuild -workspace OrangeHRM.xcworkspace -scheme OrangeHRM archive -archivePath OrangeHRM.xcarchive -allowProvisioningUpdates
           xcodebuild -exportArchive -archivePath ./OrangeHRM.xcarchive -exportPath . -exportOptionsPlist OrangeHRM/Info.plist
           mv OrangeHRM.ipa ../OrangeHRM.ipa

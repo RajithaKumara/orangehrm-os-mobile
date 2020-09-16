@@ -91,7 +91,8 @@ function* checkInstance(action?: CheckInstanceAction) {
       (!response.ok || !isJsonResponse(response)) &&
       instanceUrl.includes('/index.php')
     ) {
-      const splitedInstanceUrl = instanceUrl.split('/index.php')[0];
+      const splitedInstanceUrl =
+        instanceUrl.split('/index.php')[0] + '/index.php';
       const res: Response = yield call(
         checkInstanceRequestWithCatch,
         splitedInstanceUrl,
@@ -127,7 +128,8 @@ function* checkInstance(action?: CheckInstanceAction) {
       const responses: Response[] = yield all(effects);
 
       for (let i = 0; i < responses.length; i++) {
-        if (responses[i]?.ok && isJsonResponse(responses[i])) {
+        // `/oauth/issueToken` endpoint content-type is `text/html`. Don't check isJsonResponse(response)
+        if (responses[i]?.ok) {
           throw new InstanceCheckError(
             'OrangeHRM System Is Not Supported With Mobile App.',
           );

@@ -1,6 +1,8 @@
 {
   "name": "orangehrm-opensource",
   "version": "2.0.0",
+  "private": true,
+  "workspaces": ["storybook"],
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -8,7 +10,11 @@
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0",
     "format": "prettier src --write",
-    "format-test": "prettier __tests__ --write"
+    "format-test": "prettier __tests__ --write",
+    "start-sb": "react-native start --projectRoot ./storybook --watchFolders ./ --resetCache",
+    "watchman-del": "watchman watch-del-all",
+    "tsc": "tsc",
+    "tsc-watch": "tsc --watch"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "~1.13.2",

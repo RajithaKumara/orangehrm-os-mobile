@@ -129,7 +129,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.orangehrm.opensource"
+        applicationId "com.orangehrm.opensource4x"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode "${ORANGEHRM_VERSION_CODE}".toInteger()

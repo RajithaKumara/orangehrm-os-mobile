@@ -1,3 +1,4 @@
+import {MyInfo} from './types';
 /*
  * This file is part of OrangeHRM
  *
@@ -21,7 +22,6 @@
 import NetInfo, {NetInfoState} from '@react-native-community/netinfo';
 import {call, takeEvery, put, all, select} from 'redux-saga/effects';
 import {
-  FETCH_TOKEN,
   LOGOUT,
   FETCH_MY_INFO,
   CHECK_INSTANCE,
@@ -29,9 +29,7 @@ import {
   FetchEnabledModulesAction,
   FETCH_ENABLED_MODULES,
   FETCH_NEW_TOKEN_FINISHED,
-  FetchMyInfoAction,
   FetchNewTokenFinishedAction,
-  FETCH_API_VERSION,
 } from 'store/auth/types';
 import {
   PUBLIC_MOBILE_CLIENT_ID,
@@ -41,10 +39,9 @@ import {
 import {
   checkInstance as checkInstanceRequest,
   checkInstanceCompatibility,
-  checkRemovedEndpoints,
-  checkDeprecatedEndpoints,
+  // getEnabledModules,
   getOpenApiDefinition,
-  getOpenApiDefinitionPaths,
+  RestApiVersion,
 } from 'services/instance-check';
 import {
   USERNAME,
@@ -55,7 +52,6 @@ import {
   EXPIRES_AT,
   INSTANCE_URL,
   INSTANCE_API_VERSION,
-  INSTANCE_API_PATHS,
 } from 'services/storage';
 import {
   openLoader,
@@ -73,41 +69,27 @@ import {
   fetchMyInfoFinished,
   checkInstanceFinished,
   fetchEnabledModulesFinished,
+  myInfoFailed,
   fetchNewAuthTokenFinished,
 } from 'store/auth/actions';
 import {getExpiredAt} from 'store/auth/helper';
 import {AuthParams, ApiDetails} from 'store/storage/types';
 import {selectApiDetails} from 'store/storage/selectors';
-import {TYPE_ERROR, TYPE_WARN} from 'store/globals/types';
-import {getMessageAlongWithGenericErrors} from 'services/api';
+import {TYPE_ERROR} from 'store/globals/types';
 import {
-  API_ENDPOINT_API_VERSION,
-  API_ENDPOINT_MY_INFO_NEW,
-  prepare,
-} from 'services/endpoints';
+  getMessageAlongWithGenericErrors,
+  isJsonParseError,
+  ERROR_NO_ASSIGNED_EMPLOYEE,
+  ERROR_JSON_PARSE,
+} from 'services/api';
+import {API_ENDPOINT_MY_INFO, prepare} from 'services/endpoints';
+// import {AuthenticationError} from 'services/errors/authentication';
 import {InstanceCheckError} from 'services/errors/instance-check';
 import {
   authorize,
   AuthorizeResult,
   AuthConfiguration,
 } from 'react-native-app-auth';
-
-// commented imports
-// import {FetchTokenAction} from 'store/auth/types';
-// import {getEnabledModules} from 'services/instance-check';
-// import {myInfoFailed} from 'store/auth/actions';
-// import {
-//   isJsonParseError,
-//   ERROR_NO_ASSIGNED_EMPLOYEE,
-//   ERROR_JSON_PARSE,
-// } from 'services/api';
-// import {AuthenticationError} from 'services/errors/authentication';
-// import {useState, useCallback} from 'react';
-// import {revoke, refresh} from 'react-native-app-auth';
-// import {duration} from 'moment';
-// import {navigate} from 'lib/helpers/navigation';
-// import {LEAVE_REQUEST_SUCCESS} from 'screens';
-// import {LeaveRequestSuccessParam} from 'screens/leave/navigators';
 
 /**
  * Check instance existence & compatibility
@@ -181,16 +163,9 @@ function* checkInstance(action?: CheckInstanceAction) {
 
     if (response.ok && isJsonResponse(response)) {
       yield storageSetItem(INSTANCE_URL, instanceUrl);
-      // const data: {
-      //   version: string;
-      // } = yield call([response, response.json]);
+      const data: RestApiVersion = (yield call([response, response.json])).data;
 
-      // checkInstanceCompatibility(data);
-      // checkRemovedEndpoints(data);
-      // const usingDeprecatedEndpoints = checkDeprecatedEndpoints(data);
-      // if (usingDeprecatedEndpoints) {
-      //   yield showSnackMessage('Please Update the Application.', TYPE_WARN);
-      // }
+      checkInstanceCompatibility(data);
 
       // yield* fetchEnabledModules();
 
@@ -268,7 +243,7 @@ function* fetchEnabledModules(action?: FetchEnabledModulesAction) {
     // const instanceUrl: string = yield selectInstanceUrl();
     // const response: Response = yield call(getEnabledModules, instanceUrl);
 
-    //get enable modules , leave peroid defined , time period defined from API
+    // TODO::get enable modules , leave peroid defined , time period defined from API
     const responseData = {
       data: {
         modules: {
@@ -404,65 +379,49 @@ function* fetchMyInfo() {
     // eslint-disable-next-line no-undef
     const rawResponse: Response = yield apiCall(
       apiGetCall,
-      prepare(API_ENDPOINT_MY_INFO_NEW, {}, {model: 'detailed'}),
+      prepare(API_ENDPOINT_MY_INFO, {}, {model: 'detailed'}),
       true,
     );
 
-    const employee = yield call([rawResponse, rawResponse.json]);
-
-    // get my info from API api/v2/pim/myself
-    const response = {
-      data: {
-        employee: employee.data,
-        employeePhoto: null,
-        user: {
-          userName: 'john.doe',
-          userRole: 'Admin',
-          isSupervisor: false,
-          isProjectAdmin: false,
-          isManager: false,
-          isDirector: false,
-          isAcceptor: false,
-          isOfferer: false,
-          isHiringManager: false,
-          isInterviewer: false,
-        },
-      },
-    };
-
-    yield put(fetchMyInfoFinished(response.data));
-
-    return;
-    // if (rawResponse.ok) {
-    //   try {
-    //     const response = yield call([rawResponse, rawResponse.json]);
-    //     if (response.data) {
-    //       yield put(fetchMyInfoFinished(response.data));
-    //     } else {
-    //       // No employee assign to logged in user
-    //       yield put(
-    //         myInfoFailed(true, {
-    //           error: ERROR_NO_ASSIGNED_EMPLOYEE,
-    //           code: rawResponse.status,
-    //         }),
-    //       );
-    //       yield put(fetchMyInfoFinished(undefined, true));
-    //     }
-    //   } catch (error) {
-    //     if (isJsonParseError(error)) {
-    //       yield put(
-    //         myInfoFailed(true, {
-    //           error: ERROR_JSON_PARSE,
-    //           code: rawResponse.status,
-    //         }),
-    //       );
-    //     } else {
-    //       throw error;
-    //     }
-    //   }
-    // } else {
-    //   yield put(myInfoFailed(true, {code: rawResponse.status}));
-    // }
+    if (rawResponse.ok) {
+      try {
+        const response = yield call([rawResponse, rawResponse.json]);
+        if (response.data) {
+          const data: MyInfo = {
+            employee: response.data,
+            employeePhoto: null,
+            user: {
+              // TODO::remove
+              userRole: 'Admin',
+              isSupervisor: false,
+            },
+          };
+          yield put(fetchMyInfoFinished(data));
+        } else {
+          // No employee assign to logged in user
+          yield put(
+            myInfoFailed(true, {
+              error: ERROR_NO_ASSIGNED_EMPLOYEE,
+              code: rawResponse.status,
+            }),
+          );
+          yield put(fetchMyInfoFinished(undefined, true));
+        }
+      } catch (error) {
+        if (isJsonParseError(error)) {
+          yield put(
+            myInfoFailed(true, {
+              error: ERROR_JSON_PARSE,
+              code: rawResponse.status,
+            }),
+          );
+        } else {
+          throw error;
+        }
+      }
+    } else {
+      yield put(myInfoFailed(true, {code: rawResponse.status}));
+    }
   } catch (error) {
     if (error instanceof InstanceCheckError) {
       yield showSnackMessage(
@@ -474,9 +433,7 @@ function* fetchMyInfo() {
   }
 }
 
-function* fetchApiDefinition(
-  action: FetchMyInfoAction | FetchNewTokenFinishedAction,
-) {
+function* fetchApiDefinition(action: FetchNewTokenFinishedAction) {
   try {
     // only continue generator if `INSTANCE_API_VERSION` key not available in storage
     if (action.type === FETCH_MY_INFO) {
@@ -492,20 +449,13 @@ function* fetchApiDefinition(
     const instanceUrl: string = yield selectInstanceUrl();
     // eslint-disable-next-line no-undef
     const response: Response = yield call(getOpenApiDefinition, instanceUrl);
-    const apiDefinition = yield call([response, response.json]);
+    const apiDefinition: RestApiVersion = yield call([response, response.json]);
 
     checkInstanceCompatibility(apiDefinition);
-    checkRemovedEndpoints(apiDefinition);
-    const usingDeprecatedEndpoints = checkDeprecatedEndpoints(apiDefinition);
-    if (usingDeprecatedEndpoints) {
-      yield showSnackMessage('Please Update the Application.', TYPE_WARN);
-    }
 
-    const apiVersion = apiDefinition?.info?.version;
-    const apiPaths = Object.keys(getOpenApiDefinitionPaths(apiDefinition));
+    const apiVersion = apiDefinition.version;
     yield storageSetMulti({
       [INSTANCE_API_VERSION]: apiVersion ? apiVersion : null,
-      [INSTANCE_API_PATHS]: apiPaths ? JSON.stringify(apiPaths) : null,
     });
   } catch (error) {
     yield showSnackMessage(
@@ -518,34 +468,11 @@ function* fetchApiDefinition(
   }
 }
 
-/**
- * @todo
- */
-function* fetchApiVersion() {
-  try {
-    const response = yield apiCall(apiGetCall, API_ENDPOINT_API_VERSION, false);
-
-    if (response.data.version) {
-      yield storageSetItem(INSTANCE_API_VERSION, response.data.version);
-    } else {
-      yield storageSetItem(INSTANCE_API_VERSION, null);
-      yield showSnackMessage('Please Update the Application.', TYPE_ERROR);
-    }
-  } catch (error) {
-    yield showSnackMessage(
-      getMessageAlongWithGenericErrors(error, 'Failed to Fetch API Version.'),
-      TYPE_ERROR,
-    );
-  }
-}
-
 export function* watchAuthActions() {
-  yield takeEvery(FETCH_TOKEN, fetchAuthToken);
   yield takeEvery(LOGOUT, logout);
   yield takeEvery(FETCH_MY_INFO, fetchMyInfo);
   yield takeEvery(CHECK_INSTANCE, checkInstance);
   yield takeEvery(FETCH_ENABLED_MODULES, fetchEnabledModules);
   yield takeEvery(FETCH_NEW_TOKEN_FINISHED, fetchApiDefinition);
   // yield takeEvery(FETCH_MY_INFO, fetchApiDefinition);
-  yield takeEvery(FETCH_API_VERSION, fetchApiVersion);
 }

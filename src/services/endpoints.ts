@@ -20,7 +20,6 @@
 
 import {EndpointError} from 'services/errors/endpoints';
 
-export const API_ENDPOINT_MY_INFO = '/api/v1/myinfo';
 export const API_ENDPOINT_EMPLOYEES = '/api/v1/employees';
 
 // leave
@@ -61,7 +60,7 @@ export const API_ENDPOINT_ENABLED_MODULES = '/api/v1/enabled-modules';
 
 export const API_ENDPOINT_AUTH_ISSUE_TOKEN = '/oauth2/token';
 export const API_ENDPOINT_API_VERSION = '/api/v2/core/public/version';
-export const API_ENDPOINT_MY_INFO_NEW = '/api/v2/pim/myself';
+export const API_ENDPOINT_MY_INFO = '/api/v2/pim/myself';
 
 //help
 export const HELP_REDIRECT_URL =

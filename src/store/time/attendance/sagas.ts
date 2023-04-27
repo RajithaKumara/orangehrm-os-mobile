@@ -114,6 +114,7 @@ function* fetchAttendanceRecords(action: FetchAttendanceRecordsAction) {
     if (response.data) {
       yield put(fetchAttendanceRecordsFinished(response.data));
     } else {
+      // TODO::remove this condition
       if (response.getResponse().status === HTTP_NOT_FOUND) {
         yield put(fetchAttendanceRecordsFinished([]));
       } else {
@@ -156,10 +157,14 @@ function* fetchLeaveRecords(action: FetchLeaveRecordsAction) {
         },
       ),
     );
+    if (response.getResponse().status === 403) {
+      response.data = [];
+    }
 
     if (response.data) {
       yield put(fetchLeaveRecordsFinished(response.data));
     } else {
+      // TODO::remove this condition
       if (response.getResponse().status === HTTP_NOT_FOUND) {
         yield put(fetchLeaveRecordsFinished([]));
       } else {
@@ -270,6 +275,9 @@ function* fetchAttendanceGraphRecords(
         },
       ),
     );
+    if (leaveResponse.getResponse().status === 403) {
+      leaveResponse.data = [];
+    }
 
     const result = getGraphObject(
       workSummaryResponse.data,
@@ -314,6 +322,10 @@ function* fetchHolidays(action: FetchHolidaysAction) {
         },
       ),
     );
+    if (response.getResponse().status === 403) {
+      response.data = [];
+    }
+
     if (response.data) {
       yield put(fetchHolidaysFinished(response.data));
     } else {
@@ -342,6 +354,11 @@ function* fetchWorkWeek() {
       apiGetCall,
       API_ENDPOINT_LEAVE_WORK_WEEK,
     );
+    if (response.getResponse().status === 403) {
+      yield put(fetchWorkWeekFinished(response.data));
+      return;
+    }
+
     if (response.data) {
       yield put(fetchWorkWeekFinished(response.data));
     } else {
